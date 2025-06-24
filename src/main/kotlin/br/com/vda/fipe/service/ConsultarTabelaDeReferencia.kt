@@ -6,13 +6,10 @@ import br.com.vda.fipe.interfaces.ProcessaErroInterface
 import br.com.vda.fipe.model.ConsultarTabelaDeReferenciaModel
 import okhttp3.*
 import okhttp3.internal.EMPTY_REQUEST
-import tipoVeiculo
 import java.util.*
 
 class ConsultarTabelaDeReferencia : RequestInterface, ProcessaErroInterface {
-    fun consultar() {
-        val scanner = Scanner(System.`in`)
-
+    fun consultar(): String {
         val endPoint = "http://veiculos.fipe.org.br/api/veiculos/ConsultarTabelaDeReferencia"
         val requestBody: RequestBody = EMPTY_REQUEST
         val responseBody = request(requestBody.toString(), endPoint)
@@ -20,19 +17,12 @@ class ConsultarTabelaDeReferencia : RequestInterface, ProcessaErroInterface {
         val resultado = runCatching {
             val mesReferencia: Array<ConsultarTabelaDeReferenciaModel> =
                 ObjectMapper().readValue(responseBody, Array<ConsultarTabelaDeReferenciaModel>::class.java)
-            for (mes in mesReferencia.indices.reversed()) {
-                println(mesReferencia[mes].toString())
-            }
-
-            println("\nDigite o código do mês de referência para buscar:")
-            val codigoTabelaReferencia = scanner.nextLine().toInt()
-            tipoVeiculo(codigoTabelaReferencia)
+            mesReferencia.reversed().last().codigo.toString()
         }
 
-        resultado.onFailure {
+        return resultado.getOrElse {
             processar(responseBody)
+            ""
         }
-
-        scanner.close()
     }
 }

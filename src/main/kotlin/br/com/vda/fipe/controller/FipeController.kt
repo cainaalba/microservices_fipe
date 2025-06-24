@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class FipeController {
 
     @Autowired
-    var consultarValorComTodosParametros = ConsultarValorComTodosParametros();
+    var consultarValorComTodosParametros = ConsultarValorComTodosParametros()
 
     @PostMapping("/codigo")
     fun consultarPorCodigoFipe(@RequestBody dados: ConsultaPorFipeDto): ResponseEntity<ConsultarValorComTodosParametrosModel> {

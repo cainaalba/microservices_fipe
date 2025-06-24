@@ -41,6 +41,7 @@ class ConsultarValorComTodosParametros : RequestInterface, MontarJsonInterface, 
     fun consultarPorCodigoFipe(
         dados: ConsultaPorFipeDto
     ): ConsultarValorComTodosParametrosModel {
+        val consultarTabelaDeReferencia = ConsultarTabelaDeReferencia()
         if (!TiposVeiculo.existeCodigo(dados.codigoTipoVeiculo)) {
             throw ValidacaoException(
                 "Tipo do veículo inválido. Somente são aceitos os tipos:\n" +
@@ -58,8 +59,9 @@ class ConsultarValorComTodosParametros : RequestInterface, MontarJsonInterface, 
             throw ValidacaoException("Informe o ano do veículo!")
         }
 
+        val codigoTabelaDeReferencia = consultarTabelaDeReferencia.consultar()
         val json = mapOf(
-            "codigoTabelaReferencia" to dados.codigoTabelaReferencia,
+            "codigoTabelaReferencia" to codigoTabelaDeReferencia,
             "codigoTipoVeiculo" to dados.codigoTipoVeiculo,
             "anoModelo" to dados.anoModelo.toInt(),
             "modeloCodigoExterno" to dados.codigoFipe,
