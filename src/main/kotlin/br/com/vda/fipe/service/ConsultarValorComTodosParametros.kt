@@ -5,16 +5,12 @@ import br.com.vda.fipe.dto.TiposVeiculo
 import br.com.vda.fipe.infra.exceptionhandler.NaoEncontradoException
 import br.com.vda.fipe.infra.exceptionhandler.ValidacaoException
 import com.fasterxml.jackson.databind.ObjectMapper
-import continuarConsulta
 import br.com.vda.fipe.interfaces.MontarJsonInterface
 import br.com.vda.fipe.interfaces.ProcessaErroInterface
 import br.com.vda.fipe.interfaces.RequestInterface
 import br.com.vda.fipe.model.ConsultarValorComTodosParametrosModel
-import br.com.vda.fipe.model.NadaEncontradoModel
 import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.reflect.jvm.internal.ReflectProperties.Val
 
 @Service
 class ConsultarValorComTodosParametros : RequestInterface, MontarJsonInterface, ProcessaErroInterface {
@@ -41,10 +37,10 @@ class ConsultarValorComTodosParametros : RequestInterface, MontarJsonInterface, 
     fun consultarPorCodigoFipe(
         dados: ConsultaPorFipeDto
     ): ConsultarValorComTodosParametrosModel {
-        val consultarTabelaDeReferencia = ConsultarTabelaDeReferencia()
-        if (!TiposVeiculo.existeCodigo(dados.codigoTipoVeiculo)) {
+        val tipoVeiculo = converteTipoVeiculo(dados.codigoTipoVeiculo)
+        if (!TiposVeiculo.existeCodigo(tipoVeiculo)) {
             throw ValidacaoException(
-                "Tipo do veículo inválido. Somente são aceitos os tipos:\n" +
+                "Tipo do veículo [" + tipoVeiculo + "] inválido. Somente são aceitos os tipos:\n" +
                         "1 -> Carros e Utilitários\n" +
                         "2 -> Motos\n" +
                         "3 -> Caminhões e Micro-Ônibus"
@@ -59,17 +55,37 @@ class ConsultarValorComTodosParametros : RequestInterface, MontarJsonInterface, 
             throw ValidacaoException("Informe o ano do veículo!")
         }
 
+        val consultarTabelaDeReferencia = ConsultarTabelaDeReferencia()
         val codigoTabelaDeReferencia = consultarTabelaDeReferencia.consultar()
         val json = mapOf(
             "codigoTabelaReferencia" to codigoTabelaDeReferencia,
-            "codigoTipoVeiculo" to dados.codigoTipoVeiculo,
+            "codigoTipoVeiculo" to tipoVeiculo,
             "anoModelo" to dados.anoModelo.toInt(),
-            "modeloCodigoExterno" to dados.codigoFipe,
+            "modeloCodigoExterno" to formataCodigoFipe(dados.codigoFipe),
             "tipoConsulta" to "codigo"
         )
 
         val jsonString = montaJson(json)
+        println(jsonString)
         return processarRequisicao(jsonString)
+    }
+
+    private fun formataCodigoFipe(codigoFipe: String): String {
+        if (codigoFipe.length < 2 || codigoFipe.contains("-")) return codigoFipe;
+
+        val parte1 = codigoFipe.dropLast(1)
+        val parte2 = codigoFipe.takeLast(1)
+
+        return "$parte1-$parte2"
+    }
+
+    private fun converteTipoVeiculo(tipoVeiculo: Int): Int {
+        return when (tipoVeiculo) {
+            6, 7, 8, 11, 13, 27 -> 1 //CARROS
+            else -> {
+                3 //CAMINHOES E RESTO?
+            }
+        }
     }
 
     private fun processarRequisicao(jsonString: String): ConsultarValorComTodosParametrosModel {
@@ -80,14 +96,11 @@ class ConsultarValorComTodosParametros : RequestInterface, MontarJsonInterface, 
         val resultado = runCatching {
             val consultarValorComTodosParametrosModel =
                 ObjectMapper().readValue(responseBody, ConsultarValorComTodosParametrosModel::class.java)
-
-            return consultarValorComTodosParametrosModel
+            consultarValorComTodosParametrosModel
         }
 
-        resultado.onFailure {
+        return resultado.getOrElse {
             throw NaoEncontradoException()
         }
-
-        throw ValidacaoException("Erro inesperado ao buscar. Tente novamente!")
     }
 }

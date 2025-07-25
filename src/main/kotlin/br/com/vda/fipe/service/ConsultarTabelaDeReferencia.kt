@@ -9,7 +9,7 @@ import okhttp3.internal.EMPTY_REQUEST
 import java.util.*
 
 class ConsultarTabelaDeReferencia : RequestInterface, ProcessaErroInterface {
-    fun consultar(): String {
+    fun consultar(): Int {
         val endPoint = "http://veiculos.fipe.org.br/api/veiculos/ConsultarTabelaDeReferencia"
         val requestBody: RequestBody = EMPTY_REQUEST
         val responseBody = request(requestBody.toString(), endPoint)
@@ -17,12 +17,12 @@ class ConsultarTabelaDeReferencia : RequestInterface, ProcessaErroInterface {
         val resultado = runCatching {
             val mesReferencia: Array<ConsultarTabelaDeReferenciaModel> =
                 ObjectMapper().readValue(responseBody, Array<ConsultarTabelaDeReferenciaModel>::class.java)
-            mesReferencia.reversed().last().codigo.toString()
+            mesReferencia.reversed().last().codigo
         }
 
         return resultado.getOrElse {
             processar(responseBody)
-            ""
+            0
         }
     }
 }
