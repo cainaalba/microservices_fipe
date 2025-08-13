@@ -9,8 +9,8 @@
 		<relativePath/>
 	</parent>
 	<groupId>br.com.vda</groupId>
-	<artifactId>fipe</artifactId>
-	<version>1.1</version>
+	<artifactId>apifipe</artifactId>
+	<version>2.0</version>
 	<name>fipe</name>
 	<description>Consulta de veículos FIPE</description>
 	<url/>
