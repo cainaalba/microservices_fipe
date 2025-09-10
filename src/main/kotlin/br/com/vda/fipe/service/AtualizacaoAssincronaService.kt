@@ -8,10 +8,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import lombok.RequiredArgsConstructor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Component
@@ -23,22 +21,21 @@ class AtualizacaoAssincronaService {
     @Autowired
     var consultarValorComTodosParametros = ConsultarValorComTodosParametros()
 
-    @Async
-    @Scheduled(cron = "* * * 2 * *")
+    @Scheduled(cron = "* * * 11 * *")
 //    @Scheduled(initialDelay = 3000)
     fun atualizar() = runBlocking {
         println("Iniciando atualizações em ${LocalDateTime.now()}")
 
         val veiculos = veiculosRepo.findAll()
         veiculos.forEach {
-            val veiculo = veiculosRepo.getReferenceById(it.id)
-            println("ID: " + it.id.toString() + " - Código fipe: " + veiculo.codigoFipe)
+//            val veiculo = veiculosRepo.getReferenceById(it.id)
+            println("ID: " + it.id.toString() + " - Código fipe: " + it.codigoFipe)
 
-            val valorFipe = buscaValorFipe(veiculo)
+            val valorFipe = buscaValorFipe(it)
             if (valorFipe != 0.0) {
                 println("Valor: $valorFipe")
-                veiculo.atualizaValor(valorFipe)
-                veiculosRepo.save(veiculo) //USO EXPLÍCITO, SEM @Transactional
+                it.atualizaValor(valorFipe)
+                veiculosRepo.save(it) //USO EXPLÍCITO, SEM @Transactional
                 veiculosRepo.flush()
             }
             delay(3000)
