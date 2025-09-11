@@ -21,7 +21,7 @@ class AtualizacaoAssincronaService {
     @Autowired
     var consultarValorComTodosParametros = ConsultarValorComTodosParametros()
 
-    @Scheduled(cron = "* * * 11 * *")
+    @Scheduled(cron = "0 0 1 12 * *")
 //    @Scheduled(initialDelay = 3000)
     fun atualizar() = runBlocking {
         println("Iniciando atualizações em ${LocalDateTime.now()}")
