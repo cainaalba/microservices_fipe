@@ -21,7 +21,7 @@ class AtualizacaoAssincronaService {
     @Autowired
     var consultarValorComTodosParametros = ConsultarValorComTodosParametros()
 
-    @Scheduled(cron = "0 0 1 12 * *")
+    @Scheduled(cron = "0 0 1 2 * *")
 //    @Scheduled(initialDelay = 3000)
     fun atualizar() = runBlocking {
         println("Iniciando atualizações em ${LocalDateTime.now()}")
@@ -40,7 +40,7 @@ class AtualizacaoAssincronaService {
             }
             delay(3000)
         }
-        cancel()
+//        cancel()
     }
 
     private fun buscaValorFipe(veiculo: VeiculosModel): Double {
